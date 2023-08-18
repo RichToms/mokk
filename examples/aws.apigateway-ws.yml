@@ -1,0 +1,29 @@
+name: AWS API Gateway (WebSockets Management)
+routes:
+    # Unsuccessful routes
+  - path: "/:stage/@connections/offline"
+    method: "GET"
+    statusCode: 410
+    response: '{}'
+  - path: "/:stage/@connections/offline"
+    method: "POST"
+    statusCode: 410
+    response: '{}'
+  - path: "/:stage/@connections/offline"
+    method: "DELETE"
+    statusCode: 410
+    response: '{}'
+
+    # Successful routes
+  - path: "/:stage/@connections/:connection_id"
+    method: "GET"
+    statusCode: 200
+    response: '{"identity":{"sourceIp":"127.0.0.1","userAgent":"mokk"},"connectedAt":"2023-01-01T00:00:00.000Z","lastActiveAt":"2023-01-01T00:00:00.000Z"}'
+  - path: "/:stage/@connections/:connection_id"
+    method: "POST"
+    statusCode: 200
+    response: '{}'
+  - path: "/:stage/@connections/:connection_id"
+    method: "DELETE"
+    statusCode: 204
+    response: '{}'

@@ -24,6 +24,19 @@ If you open another terminal you should now be able to reach the server via cURL
 curl -i -X "GET" http://localhost:8080/
 ```
 
+### From Docker
+
+If you are using Docker, you can start your Mokk server without even needing to install the CLI.
+
+It is recommended to create your own config file and provide it to the container, otherwise it will start with its own example Users API.
+
+```shell
+docker run \
+  -p 8080:80 \
+  --volume my-app.mokk.yml:/app/mokk.yml \
+  richtoms/mokk:0.1
+```
+
 ## Configuration
 
 Mokk is config-driven by design, using YAML to be developer-friendly. Below is an example of a Mokk config 

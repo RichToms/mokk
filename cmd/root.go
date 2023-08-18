@@ -11,7 +11,7 @@ var rootCmd = &cobra.Command{
 	Use:   "mokk",
 	Short: "Config-driven Mock API from your CLI ",
 	Long: `Mokk is a CLI library that allows you to create mock APIs from a config file. 
-This applications improves the process of integrating with third-party servers while developing.`,
+This application improves the process of integrating with third-party servers while developing.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

@@ -42,6 +42,8 @@ func init() {
 	startCmd.Flags().Int("port", 80, "Port to host the Mokk server on")
 }
 
+// startCmdFunc is the main function for initiating a Mokk server with all the routes / config
+// defined by the end user.
 func startCmdFunc(cmd *cobra.Command, args []string) {
 	path := cmd.Flag("config")
 	cfg, err := config.LoadConfig(path.Value.String())
@@ -75,7 +77,7 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 			route.Path,
 			route.StatusCode,
 		})
-		svr.Add(route.Method, route.Path, defaultHandler(route))
+		svr.Add(route.Method, route.Path, jsonHandler(route))
 	}
 
 	fmt.Print(tbl.Render())
@@ -87,7 +89,8 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
-func defaultHandler(route config.Route) fiber.Handler {
+// jsonHandler provides a Fiber Handler for rendering JSON responses
+func jsonHandler(route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var body map[string]interface{}
 		err := json.Unmarshal([]byte(route.Response), &body)
@@ -103,6 +106,7 @@ func defaultHandler(route config.Route) fiber.Handler {
 	}
 }
 
+// printLog provides a timestamped method of logging a string
 func printLog(str string) {
 	fmt.Printf("%s | %s\n", time.Now().Format(time.TimeOnly), str)
 }

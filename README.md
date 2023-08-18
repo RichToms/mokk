@@ -3,4 +3,62 @@
 Mokk is a CLI library that allows you to create mock APIs from a config file.
 This application was built to improve the process of integrating with third-party APIs during development.
 
+## Installation
+
+You can install this CLI tool if you have Go installed and your GOPATH correctly configured.
+
+```shell
+go install github.com/richtoms/mokk@latest
+```
+
 ## How to use
+
+```shell
+mokk generate example
+mokk start --port=8080 --config=example.mokk.yml
+```
+These commands should provide an example config file for you to get started.
+If you open another terminal you should now be able to reach the server via cURL:
+
+```shell
+curl -i -X "GET" http://localhost:8080/
+```
+
+## Configuration
+
+Mokk is config-driven by design, using YAML to be developer-friendly. Below is an example of a Mokk config 
+file to help get you started:
+
+```yaml
+name: Mokk Example Server
+routes:
+  - path: "users"
+    method: "GET"
+    statusCode: 200
+    response: '{"status":"Success","users":[{"name":"MockZilla"}]}'
+
+  - path: "users/:id"
+    method: "GET"
+    statusCode: 200
+    response: '{"status":"Success","user":{"name":"MockZilla"}}'
+```
+
+### Path
+
+The path field follows [GoFiber's routing patterns](https://docs.gofiber.io/guide/routing#paths) therefore you can utilise wildcards in your paths.
+
+### Method
+
+The method field *should* be one of the major HTTP verbs:
+
+- GET
+- POST
+- PUT
+- PATCH
+- DELETE 
+- HEAD
+- OPTIONS
+
+### Response
+
+Mokk currently only supports JSON APIs, therefore this property must contain some form of JSON array/object.

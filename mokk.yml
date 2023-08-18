@@ -1,4 +1,4 @@
-name: Mokk Example Server
+name: Mokk Users Server
 routes:
   - path: "users"
     method: "GET"

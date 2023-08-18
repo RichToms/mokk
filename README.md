@@ -37,6 +37,15 @@ docker run \
   richtoms/mokk:0.1
 ```
 
+Alternatively, you can use one of the built-in example APIs found in the `./examples` directory.
+
+```shell
+docker run \                                                                                            5m 29s
+  -p 8080:80 \
+  richtoms/mokk:0.1 \
+  ./mokk start --config=./examples/aws.apigateway-ws.yml
+```
+
 ## Configuration
 
 Mokk is config-driven by design, using YAML to be developer-friendly. Below is an example of a Mokk config 
@@ -60,17 +69,19 @@ routes:
 
 The path field follows [GoFiber's routing patterns](https://docs.gofiber.io/guide/routing#paths) therefore you can utilise wildcards in your paths.
 
+**Note:** it is important when defining a mix of route params and static values to define the static paths first. Due to Fiber's routing system it will struggle to match your static path when a dynamic is defined first.
+
 ### Method
 
 The method field *should* be one of the major HTTP verbs:
 
-- GET
-- POST
-- PUT
-- PATCH
-- DELETE 
-- HEAD
-- OPTIONS
+- `GET`
+- `POST`
+- `PUT`
+- `PATCH`
+- `DELETE` 
+- `HEAD`
+- `OPTIONS`
 
 ### Response
 

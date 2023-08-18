@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -17,28 +14,30 @@ import (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start the mokk server with your config",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Start the Mokk server with your config",
+	Long: `
+ _______         __     __
+|   |   |.-----.|  |--.|  |--.
+|       ||  _  ||    < |    <
+|__|_|__||_____||__|__||__|__|
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Start the Mokk server using the specified config file & options.
+If no custom config file has been provided then Mokk will start using an example config exposing a Users API.
+
+Example local usage:
+  mokk start --config=~/code/my-app/mokk.yml --port=8080
+
+Example docker usage:
+  docker run \
+    -p 8080:80 \
+    --volume ~/code/my-app/mokk.yml:/app/mokk.yml \
+    mokk:latest
+`,
 	Run: startCmdFunc,
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// startCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// startCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	startCmd.Flags().String("config", "./mokk.yml", "The config file to init your Mokk server")
 	startCmd.Flags().Int("port", 80, "Port to host the Mokk server on")
 }
@@ -59,14 +58,15 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 	fmt.Println("|       ||  _  ||    < |    < ")
 	fmt.Println("|__|_|__||_____||__|__||__|__|")
 
-	port := cmd.Flag("port")
-
 	tbl := table.NewWriter()
+	tbl.SetStyle(table.StyleLight)
 	tbl.AppendHeader(table.Row{
 		"Method",
 		"Path",
 		"Response Code",
 	})
+
+	port := cmd.Flag("port")
 	tbl.SetCaption("Mokk server hosted at: http://localhost:%s", port.Value.String())
 
 	for _, route := range cfg.Routes {
@@ -78,10 +78,10 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 		svr.Add(route.Method, route.Path, defaultHandler(route))
 	}
 
-	tbl.SetStyle(table.StyleLight)
 	fmt.Print(tbl.Render())
 
-	fmt.Printf("\n\n%s | Starting Mokk server [%s]...\n", time.Now().Format(time.TimeOnly), cfg.Name)
+	fmt.Println("")
+	printLog(fmt.Sprintf("[%s] Starting Mokk server...", cfg.Name))
 	if err = svr.Listen(fmt.Sprintf(":%s", port.Value.String())); err != nil {
 		panic(err)
 	}
@@ -89,16 +89,20 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 
 func defaultHandler(route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		fmt.Printf("%s | %-10.10s | %s\t", time.Now().Format(time.TimeOnly), route.Method, route.Path)
 		var body map[string]interface{}
 		err := json.Unmarshal([]byte(route.Response), &body)
 		if err != nil {
-			fmt.Printf("%d (%s)\n", 500, utils.StatusMessage(500))
-			fmt.Println(fmt.Sprintf("%s | Failed to render response: %s", time.Now().Format(time.TimeOnly), err))
+			printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, 500, utils.StatusMessage(500)))
+			printLog(fmt.Sprintf("Failed to render response: %s", err))
+
 			return fiber.ErrInternalServerError
 		}
 
-		fmt.Printf("%d (%s)\n", route.StatusCode, utils.StatusMessage(route.StatusCode))
+		printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, route.StatusCode, utils.StatusMessage(route.StatusCode)))
 		return c.Status(route.StatusCode).JSON(body)
 	}
+}
+
+func printLog(str string) {
+	fmt.Printf("%s | %s\n", time.Now().Format(time.TimeOnly), str)
 }

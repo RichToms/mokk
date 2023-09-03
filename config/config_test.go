@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func TestLoadConfigFromFile(t *testing.T) {
+	cfg, err := LoadConfigFromFile("../mokk.yml")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "Mokk Users Server", cfg.Name)
+}
+
 func TestLoadConfigString(t *testing.T) {
 	tests := []struct {
 		name          string

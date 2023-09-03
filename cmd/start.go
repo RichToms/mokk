@@ -50,7 +50,7 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	svr := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})
@@ -98,7 +98,7 @@ type Response struct {
 // jsonHandler provides a Fiber Handler for rendering JSON responses
 func jsonHandler(cfg config.Options, route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var body map[string]interface{}
+		var body interface{}
 		res := getResponse(c, route)
 
 		err := json.Unmarshal([]byte(res.Response), &body)

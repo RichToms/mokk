@@ -92,6 +92,33 @@ The method field *should* be one of the major HTTP verbs:
 
 Mokk currently only supports JSON APIs, therefore this property must contain some form of JSON array/object.
 
+#### Variants
+
+Mokk supports multiple variants for the same path to allow you to have multiple responses to interact with easily. The provided fields
+of a variant's parameters must match the named route parameter for a match to be made.
+
+Below is an example config of a route definition with variants:
+
+```yaml
+  - path: "users/:user"
+    method: "GET"
+    statusCode: 200
+    response: '{"status":"Success","user":{"id":1,"name":"MockZilla"}}'
+    variants:
+      # /users/123 will return an alternative success
+      - params:
+          user: 123
+        statusCode: 200
+        response: '{"status":"Success","user":{"id":123, "name":"MockZilla Jr."}}'
+      # /users/999 will return 404
+      - params:
+          user: 999
+        statusCode: 404
+        response: '{"status":"Failure"}'
+```
+
+This feature can be used to provide failure states within the API, along with multiple success states to further your test scenarios.
+
 ### Options
 
 #### printRequestBody

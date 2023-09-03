@@ -4,32 +4,47 @@ options:
   printRequestBody: false
 
 routes:
-  - path: "users"
-    method: "GET"
+  - path: users
+    method: GET
     statusCode: 200
     response: '{"status":"Success","users":[{"name":"MockZilla"}]}'
 
-  - path: "users/999"
-    method: "GET"
-    statusCode: 404
-    response: '{"status":"Failure"}'
-
-  - path: "users/:user"
-    method: "GET"
+  - path: users/:user
+    method: GET
     statusCode: 200
-    response: '{"status":"Success","user":{"name":"MockZilla"}}'
+    response: '{"status":"Success","user":{"id":1,"name":"MockZilla"}}'
+    variants:
+      - params:
+          user: 123
+        statusCode: 200
+        response: '{"status":"Success","user":{"id":123, "name":"MockZilla Jr."}}'
+      - params:
+          user: 999
+        statusCode: 404
+        response: '{"status":"Failure"}'
 
-  - path: "users"
-    method: "POST"
+  - path: users
+    method: POST
     statusCode: 201
     response: '{"status":"Success","user":{"name":"MockZilla Jr"}}'
 
-  - path: "users/:user"
-    method: "PATCH"
+  - path: users/:user
+    method: PATCH
     statusCode: 200
     response: '{"status":"Success"}'
 
-  - path: "users/:user"
-    method: "DELETE"
+  - path: users/:user
+    method: DELETE
     statusCode: 204
     response: '{}'
+
+  - path: users/:user/clients/:client
+    method: GET
+    statusCode: 200
+    response: '{"status":"Success","client":{"id":2,"name":"Mockodile"}}'
+    variants:
+      - params:
+          user: 123
+          client: 456
+        statusCode: 200
+        response: '{"status":"Success","client":{"id":456, "name":"Mockodile Jr"}}'

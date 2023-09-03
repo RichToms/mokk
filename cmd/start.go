@@ -77,6 +77,7 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 			route.Path,
 			route.StatusCode,
 		})
+
 		svr.Add(route.Method, route.Path, jsonHandler(cfg.Options, route))
 	}
 
@@ -89,11 +90,18 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 	}
 }
 
+type Response struct {
+	StatusCode int
+	Response   string
+}
+
 // jsonHandler provides a Fiber Handler for rendering JSON responses
 func jsonHandler(cfg config.Options, route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var body map[string]interface{}
-		err := json.Unmarshal([]byte(route.Response), &body)
+		var body interface{}
+		res := getResponse(c, route)
+
+		err := json.Unmarshal([]byte(res.Response), &body)
 		if err != nil {
 			printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, 500, utils.StatusMessage(500)))
 			printLog(fmt.Sprintf("Failed to render response: %s", err))
@@ -101,7 +109,7 @@ func jsonHandler(cfg config.Options, route config.Route) fiber.Handler {
 			return fiber.ErrInternalServerError
 		}
 
-		printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, route.StatusCode, utils.StatusMessage(route.StatusCode)))
+		printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, res.StatusCode, utils.StatusMessage(res.StatusCode)))
 
 		if len(c.Body()) > 0 {
 			var b interface{}
@@ -118,11 +126,39 @@ func jsonHandler(cfg config.Options, route config.Route) fiber.Handler {
 			}
 		}
 
-		return c.Status(route.StatusCode).JSON(body)
+		return c.Status(res.StatusCode).JSON(body)
 	}
 }
 
 // printLog provides a timestamped method of logging a string.
 func printLog(str string) {
 	fmt.Printf("%s | %s\n", time.Now().Format(time.TimeOnly), str)
+}
+
+// getResponse attempts to find the correct response based on the request
+func getResponse(c *fiber.Ctx, route config.Route) Response {
+	res := Response{
+		StatusCode: route.StatusCode,
+		Response:   route.Response,
+	}
+
+	if len(route.Variants) > 0 {
+		for _, variant := range route.Variants {
+			matches := make([]bool, 0)
+			for key, value := range variant.Params {
+				if c.Params(key) == value {
+					matches = append(matches, true)
+				}
+			}
+
+			if len(matches) == len(variant.Params) {
+				res = Response{
+					StatusCode: variant.StatusCode,
+					Response:   variant.Response,
+				}
+			}
+		}
+	}
+
+	return res
 }

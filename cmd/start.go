@@ -46,7 +46,7 @@ func init() {
 // defined by the end user.
 func startCmdFunc(cmd *cobra.Command, args []string) {
 	path := cmd.Flag("config")
-	cfg, err := config.LoadConfig(path.Value.String())
+	cfg, err := config.LoadConfigFromFile(path.Value.String())
 	if err != nil {
 		panic(err)
 	}

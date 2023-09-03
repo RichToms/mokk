@@ -53,6 +53,10 @@ file to help get you started:
 
 ```yaml
 name: Mokk Example Server
+
+options:
+  printRequestBody: true
+  
 routes:
   - path: "users"
     method: "GET"
@@ -65,13 +69,14 @@ routes:
     response: '{"status":"Success","user":{"name":"MockZilla"}}'
 ```
 
-### Path
+### Routes
+#### Path
 
 The path field follows [GoFiber's routing patterns](https://docs.gofiber.io/guide/routing#paths) therefore you can utilise wildcards in your paths.
 
 **Note:** it is important when defining a mix of route params and static values to define the static paths first. Due to Fiber's routing system it will struggle to match your static path when a dynamic is defined first.
 
-### Method
+#### Method
 
 The method field *should* be one of the major HTTP verbs:
 
@@ -83,6 +88,13 @@ The method field *should* be one of the major HTTP verbs:
 - `HEAD`
 - `OPTIONS`
 
-### Response
+#### Response
 
 Mokk currently only supports JSON APIs, therefore this property must contain some form of JSON array/object.
+
+### Options
+
+#### printRequestBody
+
+If enabled, any request with a JSON body will have the contents printed to the console. This feature
+can be useful when debugging what your application is sending to the mocked API.

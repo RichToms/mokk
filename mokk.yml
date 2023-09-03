@@ -1,4 +1,8 @@
 name: Mokk Users Server
+
+options:
+  printRequestBody: false
+
 routes:
   - path: "users"
     method: "GET"

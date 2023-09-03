@@ -77,7 +77,7 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 			route.Path,
 			route.StatusCode,
 		})
-		svr.Add(route.Method, route.Path, jsonHandler(route))
+		svr.Add(route.Method, route.Path, jsonHandler(cfg.Options, route))
 	}
 
 	fmt.Print(tbl.Render())
@@ -90,7 +90,7 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 }
 
 // jsonHandler provides a Fiber Handler for rendering JSON responses
-func jsonHandler(route config.Route) fiber.Handler {
+func jsonHandler(cfg config.Options, route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var body map[string]interface{}
 		err := json.Unmarshal([]byte(route.Response), &body)
@@ -102,11 +102,27 @@ func jsonHandler(route config.Route) fiber.Handler {
 		}
 
 		printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, route.StatusCode, utils.StatusMessage(route.StatusCode)))
+
+		if len(c.Body()) > 0 {
+			var b interface{}
+			err := json.Unmarshal(c.Body(), &b)
+			if err != nil {
+				fmt.Println("Error parsing request body")
+
+				return fiber.ErrBadRequest
+			}
+
+			if cfg.PrintRequestBody {
+				str, _ := json.Marshal(b)
+				printLog(fmt.Sprintf("%-10.10s | %s", "Body", str))
+			}
+		}
+
 		return c.Status(route.StatusCode).JSON(body)
 	}
 }
 
-// printLog provides a timestamped method of logging a string
+// printLog provides a timestamped method of logging a string.
 func printLog(str string) {
 	fmt.Printf("%s | %s\n", time.Now().Format(time.TimeOnly), str)
 }

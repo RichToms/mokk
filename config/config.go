@@ -6,8 +6,15 @@ import (
 )
 
 type Config struct {
-	Name   string  `yaml:"name"`
-	Routes []Route `yaml:"routes"`
+	Name    string  `yaml:"name"`
+	Options Options `yaml:"config"`
+	Routes  []Route `yaml:"routes"`
+}
+
+type Options struct {
+	// When a request body is received, attempt to print the value to the console
+	// after the table record.
+	PrintRequestBody bool `yaml:"printRequestBody"`
 }
 
 type Route struct {

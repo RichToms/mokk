@@ -99,7 +99,7 @@ type Response struct {
 func jsonHandler(cfg config.Options, route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var body interface{}
-		res := getResponse(c, route)
+		res := getResponse(getParamsFromCtx(c), route)
 
 		err := json.Unmarshal([]byte(res.Response), &body)
 		if err != nil {
@@ -135,8 +135,19 @@ func printLog(str string) {
 	fmt.Printf("%s | %s\n", time.Now().Format(time.TimeOnly), str)
 }
 
-// getResponse attempts to find the correct response based on the request
-func getResponse(c *fiber.Ctx, route config.Route) Response {
+// getParamsFromCtx extracts all route params into a map from the Fiber context.
+func getParamsFromCtx(c *fiber.Ctx) map[string]string {
+	p := map[string]string{}
+
+	for _, param := range c.Route().Params {
+		p[param] = c.Params(param)
+	}
+
+	return p
+}
+
+// getResponse attempts to find the correct response based on the request.
+func getResponse(params map[string]string, route config.Route) Response {
 	res := Response{
 		StatusCode: route.StatusCode,
 		Response:   route.Response,
@@ -146,7 +157,7 @@ func getResponse(c *fiber.Ctx, route config.Route) Response {
 		for _, variant := range route.Variants {
 			matches := make([]bool, 0)
 			for key, value := range variant.Params {
-				if c.Params(key) == value {
+				if params[key] == value {
 					matches = append(matches, true)
 				}
 			}

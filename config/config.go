@@ -18,10 +18,17 @@ type Options struct {
 }
 
 type Route struct {
-	Path       string `yaml:"path"`
-	Method     string `yaml:"method"`
-	StatusCode int    `yaml:"statusCode"`
-	Response   string `yaml:"response"`
+	Path       string         `yaml:"path"`
+	Method     string         `yaml:"method"`
+	StatusCode int            `yaml:"statusCode"`
+	Response   string         `yaml:"response"`
+	Variants   []RouteVariant `yaml:"variants,omitempty"`
+}
+
+type RouteVariant struct {
+	Params     map[string]string `yaml:"params"`
+	StatusCode int               `yaml:"statusCode"`
+	Response   string            `yaml:"response"`
 }
 
 func LoadConfig(cfgPath string) (Config, error) {

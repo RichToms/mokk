@@ -7,7 +7,7 @@ import (
 
 type Config struct {
 	Name    string  `yaml:"name"`
-	Options Options `yaml:"config"`
+	Options Options `yaml:"options"`
 	Routes  []Route `yaml:"routes"`
 }
 
@@ -31,14 +31,21 @@ type RouteVariant struct {
 	Response   string            `yaml:"response"`
 }
 
-func LoadConfig(cfgPath string) (Config, error) {
+// LoadConfigFromFile attempts to load the config from the given file path.
+func LoadConfigFromFile(cfgPath string) (Config, error) {
 	cfgString, err := os.ReadFile(cfgPath)
 	if err != nil {
 		panic(err)
 	}
+
+	return loadConfigString(string(cfgString))
+}
+
+// loadConfigString attempts to unmarshal a YAML string into a Mokk config.
+func loadConfigString(cfgString string) (Config, error) {
 	var cfg Config
 
-	err = yaml.Unmarshal([]byte(cfgString), &cfg)
+	err := yaml.Unmarshal([]byte(cfgString), &cfg)
 	if err != nil {
 		return Config{}, err
 	}

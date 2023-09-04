@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/richtoms/mokk/config"
+	"github.com/richtoms/mokk/logging"
+	"github.com/richtoms/mokk/server"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 // startCmd represents the start command
@@ -51,14 +50,13 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
+	logger := logging.NewLogger()
+
 	svr := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})
 
-	fmt.Println(" _______         __     __    ")
-	fmt.Println("|   |   |.-----.|  |--.|  |--.")
-	fmt.Println("|       ||  _  ||    < |    < ")
-	fmt.Println("|__|_|__||_____||__|__||__|__|")
+	logger.PrintLogo()
 
 	tbl := table.NewWriter()
 	tbl.SetStyle(table.StyleLight)
@@ -78,98 +76,15 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 			route.StatusCode,
 		})
 
-		svr.Add(route.Method, route.Path, jsonHandler(cfg.Options, route))
+		svr.Add(route.Method, route.Path, server.JsonHandler(cfg.Options, logger.TimestampedRow, route))
 	}
 
 	fmt.Print(tbl.Render())
 
-	fmt.Println("")
-	printLog(fmt.Sprintf("[%s] Starting Mokk server...", cfg.Name))
+	logger.NewLine()
+	logger.TimestampedRow(fmt.Sprintf("[%s] Starting Mokk server...", cfg.Name))
+	
 	if err = svr.Listen(fmt.Sprintf(":%s", port.Value.String())); err != nil {
 		panic(err)
 	}
-}
-
-type Response struct {
-	StatusCode int
-	Response   string
-}
-
-// jsonHandler provides a Fiber Handler for rendering JSON responses
-func jsonHandler(cfg config.Options, route config.Route) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		var body interface{}
-		res := getResponse(getParamsFromCtx(c), route)
-
-		err := json.Unmarshal([]byte(res.Response), &body)
-		if err != nil {
-			printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, 500, utils.StatusMessage(500)))
-			printLog(fmt.Sprintf("Failed to render response: %s", err))
-
-			return fiber.ErrInternalServerError
-		}
-
-		printLog(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, res.StatusCode, utils.StatusMessage(res.StatusCode)))
-
-		if len(c.Body()) > 0 {
-			var b interface{}
-			err := json.Unmarshal(c.Body(), &b)
-			if err != nil {
-				fmt.Println("Error parsing request body")
-
-				return fiber.ErrBadRequest
-			}
-
-			if cfg.PrintRequestBody {
-				str, _ := json.Marshal(b)
-				printLog(fmt.Sprintf("%-10.10s | %s", "Body", str))
-			}
-		}
-
-		return c.Status(res.StatusCode).JSON(body)
-	}
-}
-
-// printLog provides a timestamped method of logging a string.
-func printLog(str string) {
-	fmt.Printf("%s | %s\n", time.Now().Format(time.TimeOnly), str)
-}
-
-// getParamsFromCtx extracts all route params into a map from the Fiber context.
-func getParamsFromCtx(c *fiber.Ctx) map[string]string {
-	p := map[string]string{}
-
-	for _, param := range c.Route().Params {
-		p[param] = c.Params(param)
-	}
-
-	return p
-}
-
-// getResponse attempts to find the correct response based on the request.
-func getResponse(params map[string]string, route config.Route) Response {
-	res := Response{
-		StatusCode: route.StatusCode,
-		Response:   route.Response,
-	}
-
-	if len(route.Variants) > 0 {
-		for _, variant := range route.Variants {
-			matches := make([]bool, 0)
-			for key, value := range variant.Params {
-				if params[key] == value {
-					matches = append(matches, true)
-				}
-			}
-
-			if len(matches) == len(variant.Params) {
-				res = Response{
-					StatusCode: variant.StatusCode,
-					Response:   variant.Response,
-				}
-			}
-		}
-	}
-
-	return res
 }

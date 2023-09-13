@@ -7,7 +7,7 @@ import (
 
 func (c *Config) OverrideFromCommand(cmd *cobra.Command) {
 	c.Options.Port = resolvePort(*c, cmd.Flag("port").Value.String())
-	c.Options.Host = resolveHost(*c)
+	c.Options.Host = resolveHost(*c, os.Getenv("SERVER_HOST"))
 }
 
 // resolvePort attempts to determine which port to host the server on.
@@ -22,8 +22,8 @@ func resolvePort(cfg Config, cmdPort string) string {
 }
 
 // resolveHost attempts to determine which host to serve on.
-func resolveHost(cfg Config) string {
-	if envHost := os.Getenv("SERVER_HOST"); envHost != "" {
+func resolveHost(cfg Config, envHost string) string {
+	if envHost != "" {
 		return envHost
 	}
 

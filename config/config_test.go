@@ -30,6 +30,8 @@ func TestLoadConfigString(t *testing.T) {
 			input: configWithOptions,
 			assertionFunc: func(t *testing.T, cfg Config) {
 				assert.Equal(t, true, cfg.Options.PrintRequestBody)
+				assert.Equal(t, "9001", cfg.Options.Port)
+				assert.Equal(t, "0.0.0.0", cfg.Options.Host)
 			},
 		},
 		{
@@ -95,6 +97,8 @@ name: Mokk Server with options
 
 options:
   printRequestBody: true
+  port: 9001
+  host: 0.0.0.0
 
 routes:
   - path: example

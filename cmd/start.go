@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/richtoms/mokk/config"
 	"github.com/richtoms/mokk/logging"
 	"github.com/richtoms/mokk/server"
@@ -42,7 +40,7 @@ func init() {
 
 // startCmdFunc is the main function for initiating a Mokk server with all the routes / config
 // defined by the end user.
-func startCmdFunc(cmd *cobra.Command, args []string) {
+func startCmdFunc(cmd *cobra.Command, _ []string) {
 	path := cmd.Flag("config")
 	cfg, err := config.LoadConfigFromFile(path.Value.String())
 	if err != nil {
@@ -52,42 +50,15 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 	cfg.OverrideFromCommand(cmd)
 
 	logger := logging.NewLogger()
-	svr := createServer(cfg, logger)
-
 	logger.PrintLogo()
 
-	tbl := table.NewWriter()
-	tbl.SetStyle(table.StyleLight)
-	tbl.AppendHeader(table.Row{
-		"Method",
-		"Path",
-		"Response Code",
+	svr := server.NewServer(cfg, logger, server.Options{
+		Port: cfg.Options.Port,
+		Host: cfg.Options.Host,
 	})
-
-	tbl.SetCaption("Mokk server hosted at: http://%s:%s", svr.Options.Host, svr.Options.Port)
-
-	for _, route := range cfg.Routes {
-		tbl.AppendRow(table.Row{
-			route.Method,
-			route.Path,
-			route.StatusCode,
-		})
-	}
-
-	fmt.Print(tbl.Render())
-
-	logger.NewLine()
-	logger.TimestampedRow(fmt.Sprintf("[%s] Starting Mokk server...", cfg.Name))
+	svr.PrintConfig()
 
 	if err = svr.Listen(); err != nil {
 		panic(err)
 	}
-}
-
-// createServer builds a server instance with all dependencies from the main process.
-func createServer(cfg config.Config, logger logging.Logger) server.Server {
-	return server.NewServer(cfg, logger, server.Options{
-		Port: cfg.Options.Port,
-		Host: cfg.Options.Host,
-	})
 }

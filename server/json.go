@@ -4,42 +4,50 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/utils"
 	"github.com/richtoms/mokk/config"
 )
 
 // JsonHandler provides a Fiber Handler for rendering JSON responses
-func JsonHandler(cfg config.Options, printFn func(str string), route config.Route) fiber.Handler {
+// (1) Unmarshal the incoming request body, in the event of failure respond with 400.
+// (2) Find the response body for the route, including any variants.
+// (3) Unmarshal the raw response body, in the event of failure respond with 500.
+// (4) Respond to the client with the found response.
+func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var body interface{}
+		err := json.Unmarshal(c.Body(), &body)
+
+		if err != nil {
+			errRes := Response{fiber.StatusBadRequest, "Error parsing request body: invalid JSON provided"}
+			record := svr.rLog.Record(route, string(c.Body()), errRes)
+
+			c.Append("mokk-request-id", record.Id)
+			return fiber.NewError(errRes.StatusCode, errRes.Response)
+		}
+
 		res := getResponse(getParamsFromCtx(c), route)
 
-		err := json.Unmarshal([]byte(res.Response), &body)
+		var resBody interface{}
+		err = json.Unmarshal([]byte(res.Response), &resBody)
 		if err != nil {
-			printFn(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, 500, utils.StatusMessage(500)))
-			printFn(fmt.Sprintf("Failed to render response: %s", err))
+			errRes := Response{fiber.StatusInternalServerError, fmt.Sprintf("Error rendering response: %s", err)}
+			record := svr.rLog.Record(route, string(c.Body()), errRes)
 
-			return fiber.ErrInternalServerError
+			c.Append("mokk-request-id", record.Id)
+			return fiber.NewError(errRes.StatusCode, errRes.Response)
 		}
 
-		printFn(fmt.Sprintf("%-10.10s | %s\t %d (%s)", route.Method, route.Path, res.StatusCode, utils.StatusMessage(res.StatusCode)))
+		record := svr.rLog.Record(route, body, res)
+		c.Append("mokk-request-id", record.Id)
 
 		if len(c.Body()) > 0 {
-			var b interface{}
-			err := json.Unmarshal(c.Body(), &b)
-			if err != nil {
-				fmt.Println("Error parsing request body")
-
-				return fiber.ErrBadRequest
-			}
-
 			if cfg.PrintRequestBody {
-				str, _ := json.Marshal(b)
-				printFn(fmt.Sprintf("%-10.10s | %s", "Body", str))
+				str, _ := json.Marshal(body)
+				fmt.Println(string(str))
 			}
 		}
 
-		return c.Status(res.StatusCode).JSON(body)
+		return c.Status(res.StatusCode).JSON(resBody)
 	}
 }
 

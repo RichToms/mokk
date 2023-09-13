@@ -5,6 +5,11 @@ import (
 	"os"
 )
 
+const (
+	DefaultPort = "8080"
+	DefaultHost = "127.0.0.1"
+)
+
 type Config struct {
 	Name    string  `yaml:"name"`
 	Options Options `yaml:"options"`
@@ -15,20 +20,23 @@ type Options struct {
 	// When a request body is received, attempt to print the value to the console
 	// after the table record.
 	PrintRequestBody bool `yaml:"printRequestBody"`
+
+	Port string `yaml:"port"`
+	Host string `yaml:"host"`
 }
 
 type Route struct {
-	Path       string         `yaml:"path"`
-	Method     string         `yaml:"method"`
-	StatusCode int            `yaml:"statusCode"`
-	Response   string         `yaml:"response"`
-	Variants   []RouteVariant `yaml:"variants,omitempty"`
+	Path       string         `yaml:"path" json:"path"`
+	Method     string         `yaml:"method" json:"method"`
+	StatusCode int            `yaml:"statusCode" json:"statusCode"`
+	Response   string         `yaml:"response" json:"response"`
+	Variants   []RouteVariant `yaml:"variants,omitempty" json:"variants"`
 }
 
 type RouteVariant struct {
-	Params     map[string]string `yaml:"params"`
-	StatusCode int               `yaml:"statusCode"`
-	Response   string            `yaml:"response"`
+	Params     map[string]string `yaml:"params" json:"params"`
+	StatusCode int               `yaml:"statusCode" json:"statusCode"`
+	Response   string            `yaml:"response" json:"response"`
 }
 
 // LoadConfigFromFile attempts to load the config from the given file path.

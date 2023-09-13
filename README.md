@@ -11,12 +11,13 @@ You can install this CLI tool if you have Go installed and your GOPATH correctly
 go install github.com/richtoms/mokk@latest
 ```
 
-## How to use
+## How to run Mokk
 
 ```shell
 mokk generate example
 mokk start --port=8080 --config=example.mokk.yml
 ```
+
 These commands should provide an example config file for you to get started.
 If you open another terminal you should now be able to reach the server via cURL:
 
@@ -34,15 +35,15 @@ It is recommended to create your own config file and provide it to the container
 docker run \
   -p 8080:80 \
   --volume my-app.mokk.yml:/app/mokk.yml \
-  richtoms/mokk:0.1
+  richtoms/mokk:v0.5
 ```
 
 Alternatively, you can use one of the built-in example APIs found in the `./examples` directory.
 
 ```shell
-docker run \                                                                                            5m 29s
+docker run \
   -p 8080:80 \
-  richtoms/mokk:0.1 \
+  richtoms/mokk:v0.5 \
   ./mokk start --config=./examples/aws.apigateway-ws.yml
 ```
 
@@ -125,3 +126,13 @@ This feature can be used to provide failure states within the API, along with mu
 
 If enabled, any request with a JSON body will have the contents printed to the console. This feature
 can be useful when debugging what your application is sending to the mocked API.
+
+
+## System API
+
+Mokk provides an API that can provide you with logs of any captured requests while the server is running.
+
+The following paths are implemented:
+
+- `/_mokk/requests`
+- `/_mokk/requests/:id`

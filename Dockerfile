@@ -18,7 +18,7 @@ WORKDIR /app
 
 COPY --from=builder /workspace/${DIST_PATH} ./
 
-ENV SERVER_HOST = "0.0.0.0"
+ENV SERVER_HOST 0.0.0.0
 
 EXPOSE 80
 

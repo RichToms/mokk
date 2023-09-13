@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	DefaultPort = "8080"
+	DefaultPort = "80"
 	DefaultHost = "127.0.0.1"
 )
 

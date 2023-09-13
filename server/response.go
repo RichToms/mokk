@@ -3,8 +3,8 @@ package server
 import "github.com/richtoms/mokk/config"
 
 type Response struct {
-	StatusCode int
-	Response   string
+	StatusCode int    `json:"statusCode"`
+	Response   string `json:"response"`
 }
 
 // getResponse attempts to find the correct response based on the request.

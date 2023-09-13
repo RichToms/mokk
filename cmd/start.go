@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/richtoms/mokk/config"
 	"github.com/richtoms/mokk/logging"
@@ -38,7 +37,7 @@ Example docker usage:
 func init() {
 	rootCmd.AddCommand(startCmd)
 	startCmd.Flags().String("config", "./mokk.yml", "The config file to init your Mokk server")
-	startCmd.Flags().Int("port", 80, "Port to host the Mokk server on")
+	startCmd.Flags().String("port", config.DefaultPort, "Port to host the Mokk server on")
 }
 
 // startCmdFunc is the main function for initiating a Mokk server with all the routes / config
@@ -50,11 +49,10 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	logger := logging.NewLogger()
+	cfg.OverrideFromCommand(cmd)
 
-	svr := fiber.New(fiber.Config{
-		DisableStartupMessage: true,
-	})
+	logger := logging.NewLogger()
+	svr := createServer(cfg, logger)
 
 	logger.PrintLogo()
 
@@ -66,8 +64,7 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 		"Response Code",
 	})
 
-	port := cmd.Flag("port")
-	tbl.SetCaption("Mokk server hosted at: http://localhost:%s", port.Value.String())
+	tbl.SetCaption("Mokk server hosted at: http://%s:%s", svr.Options.Host, svr.Options.Port)
 
 	for _, route := range cfg.Routes {
 		tbl.AppendRow(table.Row{
@@ -75,16 +72,22 @@ func startCmdFunc(cmd *cobra.Command, args []string) {
 			route.Path,
 			route.StatusCode,
 		})
-
-		svr.Add(route.Method, route.Path, server.JsonHandler(cfg.Options, logger.TimestampedRow, route))
 	}
 
 	fmt.Print(tbl.Render())
 
 	logger.NewLine()
 	logger.TimestampedRow(fmt.Sprintf("[%s] Starting Mokk server...", cfg.Name))
-	
-	if err = svr.Listen(fmt.Sprintf(":%s", port.Value.String())); err != nil {
+
+	if err = svr.Listen(); err != nil {
 		panic(err)
 	}
+}
+
+// createServer builds a server instance with all dependencies from the main process.
+func createServer(cfg config.Config, logger logging.Logger) server.Server {
+	return server.NewServer(cfg, logger, server.Options{
+		Port: cfg.Options.Port,
+		Host: cfg.Options.Host,
+	})
 }

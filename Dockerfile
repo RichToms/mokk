@@ -18,6 +18,8 @@ WORKDIR /app
 
 COPY --from=builder /workspace/${DIST_PATH} ./
 
+ENV SERVER_HOST = "0.0.0.0"
+
 EXPOSE 80
 
 CMD [ "./mokk", "start" ]

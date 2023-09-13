@@ -5,6 +5,11 @@ import (
 	"os"
 )
 
+const (
+	DefaultPort = "8080"
+	DefaultHost = "127.0.0.1"
+)
+
 type Config struct {
 	Name    string  `yaml:"name"`
 	Options Options `yaml:"options"`
@@ -15,6 +20,9 @@ type Options struct {
 	// When a request body is received, attempt to print the value to the console
 	// after the table record.
 	PrintRequestBody bool `yaml:"printRequestBody"`
+
+	Port string `yaml:"port"`
+	Host string `yaml:"host"`
 }
 
 type Route struct {

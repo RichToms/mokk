@@ -15,7 +15,7 @@ import (
 func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var body interface{}
-		err := json.Unmarshal(c.Body(), &body)
+		err := json.Unmarshal(resolveRequestBody(c.Body()), &body)
 
 		if err != nil {
 			errRes := Response{fiber.StatusBadRequest, "Error parsing request body: invalid JSON provided"}
@@ -60,4 +60,13 @@ func getParamsFromCtx(c *fiber.Ctx) map[string]string {
 	}
 
 	return p
+}
+
+// resolveRequestBody ensures a JSON body is provided for processing
+func resolveRequestBody(body []byte) []byte {
+	if len(body) == 0 {
+		return []byte("{}")
+	}
+
+	return body
 }

@@ -13,6 +13,30 @@ go install github.com/richtoms/mokk@latest
 
 ## How to run Mokk
 
+### From Docker (Recommended)
+
+If you are using Docker, you can start your Mokk server without even needing to install the CLI.
+
+It is recommended to create your own config file and provide it to the container, otherwise it will start with its own example Users API.
+
+```shell
+docker run \
+  -p 8080:80 \
+  --volume my-app.mokk.yml:/app/mokk.yml \
+  richtoms/mokk:v1.0
+```
+
+Alternatively, you can use one of the built-in example APIs found in the `./examples` directory.
+
+```shell
+docker run \
+  -p 8080:80 \
+  richtoms/mokk:v1.0 \
+  ./mokk start --config=./examples/aws.apigateway-ws.yml
+```
+
+### Via CLI
+
 ```shell
 mokk generate example
 mokk start --port=8080 --config=example.mokk.yml
@@ -23,28 +47,6 @@ If you open another terminal you should now be able to reach the server via cURL
 
 ```shell
 curl -i -X "GET" http://localhost:8080/
-```
-
-### From Docker
-
-If you are using Docker, you can start your Mokk server without even needing to install the CLI.
-
-It is recommended to create your own config file and provide it to the container, otherwise it will start with its own example Users API.
-
-```shell
-docker run \
-  -p 8080:80 \
-  --volume my-app.mokk.yml:/app/mokk.yml \
-  richtoms/mokk:v0.5
-```
-
-Alternatively, you can use one of the built-in example APIs found in the `./examples` directory.
-
-```shell
-docker run \
-  -p 8080:80 \
-  richtoms/mokk:v0.5 \
-  ./mokk start --config=./examples/aws.apigateway-ws.yml
 ```
 
 ## Configuration

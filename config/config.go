@@ -21,6 +21,8 @@ type Options struct {
 	// after the table record.
 	PrintRequestBody bool `yaml:"printRequestBody"`
 
+	TrackRequests bool `yaml:"trackRequests"`
+
 	Port string `yaml:"port"`
 	Host string `yaml:"host"`
 }

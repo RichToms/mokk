@@ -23,7 +23,7 @@ It is recommended to create your own config file and provide it to the container
 docker run \
   -p 8080:80 \
   --volume my-app.mokk.yml:/app/mokk.yml \
-  richtoms/mokk:v1.0
+  richtoms/mokk:v1.1
 ```
 
 Alternatively, you can use one of the built-in example APIs found in the `./examples` directory.
@@ -70,6 +70,7 @@ routes:
     method: "GET"
     statusCode: 200
     response: '{"status":"Success","user":{"name":"MockZilla"}}'
+    delay: 100
 ```
 
 ### Routes
@@ -122,12 +123,22 @@ Below is an example config of a route definition with variants:
 
 This feature can be used to provide failure states within the API, along with multiple success states to further your test scenarios.
 
+#### Delay
+
+This feature will allow you to add a number of milliseconds delay to Mokk's response in order to simulate actual response times and even timeouts in your API clients.
+
 ### Options
 
 #### printRequestBody
 
 If enabled, any request with a JSON body will have the contents printed to the console. This feature
 can be useful when debugging what your application is sending to the mocked API.
+
+#### trackRequests
+
+If enabled, any request made to a configured endpoint will be tracked and retrievable from the System API. 
+
+This feature is disabled by default.
 
 
 ## System API

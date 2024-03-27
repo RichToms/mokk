@@ -27,6 +27,7 @@ routes:
     method: POST
     statusCode: 201
     response: '{"status":"Success","user":{"name":"MockZilla Jr"}}'
+    delay: 500
 
   - path: users/:user
     method: PATCH

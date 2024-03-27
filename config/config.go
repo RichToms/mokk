@@ -33,6 +33,7 @@ type Route struct {
 	StatusCode int            `yaml:"statusCode" json:"statusCode"`
 	Response   string         `yaml:"response" json:"response"`
 	Variants   []RouteVariant `yaml:"variants,omitempty" json:"variants"`
+	Delay      int            `yaml:"delay"`
 }
 
 type RouteVariant struct {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/richtoms/mokk/config"
+	"time"
 )
 
 // JsonHandler provides a Fiber Handler for rendering JSON responses
@@ -45,6 +46,10 @@ func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Hand
 		if cfg.TrackRequests {
 			record := svr.rLog.Record(route, body, res)
 			c.Append("mokk-request-id", record.Id)
+		}
+
+		if route.Delay > 0 {
+			time.Sleep(time.Duration(route.Delay) * time.Millisecond)
 		}
 
 		if len(c.Body()) > 0 {

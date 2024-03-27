@@ -19,9 +19,12 @@ func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Hand
 
 		if err != nil {
 			errRes := Response{fiber.StatusBadRequest, "Error parsing request body: invalid JSON provided"}
-			record := svr.rLog.Record(route, string(c.Body()), errRes)
 
-			c.Append("mokk-request-id", record.Id)
+			if cfg.TrackRequests {
+				record := svr.rLog.Record(route, string(c.Body()), errRes)
+				c.Append("mokk-request-id", record.Id)
+			}
+
 			return fiber.NewError(errRes.StatusCode, errRes.Response)
 		}
 
@@ -33,12 +36,16 @@ func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Hand
 			errRes := Response{fiber.StatusInternalServerError, fmt.Sprintf("Error rendering response: %s", err)}
 			record := svr.rLog.Record(route, string(c.Body()), errRes)
 
-			c.Append("mokk-request-id", record.Id)
-			return fiber.NewError(errRes.StatusCode, errRes.Response)
+			if cfg.TrackRequests {
+				c.Append("mokk-request-id", record.Id)
+				return fiber.NewError(errRes.StatusCode, errRes.Response)
+			}
 		}
 
-		record := svr.rLog.Record(route, body, res)
-		c.Append("mokk-request-id", record.Id)
+		if cfg.TrackRequests {
+			record := svr.rLog.Record(route, body, res)
+			c.Append("mokk-request-id", record.Id)
+		}
 
 		if len(c.Body()) > 0 {
 			if cfg.PrintRequestBody {

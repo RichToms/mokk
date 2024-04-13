@@ -98,8 +98,7 @@ Mokk currently only supports JSON APIs, therefore this property must contain som
 
 #### Variants
 
-Mokk supports multiple variants for the same path to allow you to have multiple responses to interact with easily. The provided fields
-of a variant's parameters must match the named route parameter for a match to be made.
+Mokk supports multiple variants for the same path to allow you to have multiple responses to interact with easily. The provided fields of a variant's parameters must match the named route parameter for a match to be made. Mokk will look at the Route parameters and any Query parameters to find the variant specified.
 
 Below is an example config of a route definition with variants:
 

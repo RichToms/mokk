@@ -71,6 +71,10 @@ func getParamsFromCtx(c *fiber.Ctx) map[string]string {
 		p[param] = c.Params(param)
 	}
 
+	for key, value := range c.Queries() {
+		p[key] = value
+	}
+
 	return p
 }
 

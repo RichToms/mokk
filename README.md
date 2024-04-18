@@ -3,6 +3,10 @@
 Mokk is a CLI library that allows you to create mock APIs from a config file.
 This application was built to improve the process of integrating with third-party APIs during development.
 
+<p align="center">
+  <img src="./demo.gif"  alt="Demo of Mokk"/>
+</p>
+
 ## Installation
 
 You can install this CLI tool if you have Go installed and your GOPATH correctly configured.
@@ -23,7 +27,7 @@ It is recommended to create your own config file and provide it to the container
 docker run \
   -p 8080:80 \
   --volume my-app.mokk.yml:/app/mokk.yml \
-  richtoms/mokk:v1.1
+  richtoms/mokk:latest
 ```
 
 Alternatively, you can use one of the built-in example APIs found in the `./examples` directory.
@@ -31,7 +35,7 @@ Alternatively, you can use one of the built-in example APIs found in the `./exam
 ```shell
 docker run \
   -p 8080:80 \
-  richtoms/mokk:v1.0 \
+  richtoms/mokk:latest \
   ./mokk start --config=./examples/aws.apigateway-ws.yml
 ```
 

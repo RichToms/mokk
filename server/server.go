@@ -3,9 +3,10 @@ package server
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/pterm/pterm"
 	"github.com/richtoms/mokk/config"
 	"github.com/richtoms/mokk/logging"
+	"strconv"
 )
 
 type Server struct {
@@ -55,13 +56,9 @@ func (s *Server) Listen() error {
 
 // PrintConfig outputs the defined routes in table form and the final host that the server is listening on.
 func (s *Server) PrintConfig() {
-	tbl := table.NewWriter()
-	tbl.SetStyle(table.StyleLight)
-	tbl.AppendHeader(table.Row{
-		"Method",
-		"Path",
-		"Response Code",
-	})
+	tableData := pterm.TableData{
+		{"Method", "Path", "Response code"},
+	}
 
 	for _, route := range s.cfg.Routes {
 		pathStr := route.Path
@@ -70,13 +67,13 @@ func (s *Server) PrintConfig() {
 			pathStr = fmt.Sprintf("%s (+%d variants)", pathStr, len(route.Variants))
 		}
 
-		tbl.AppendRow(table.Row{
+		tableData = append(tableData, []string{
 			route.Method,
 			pathStr,
-			route.StatusCode,
+			strconv.Itoa(route.StatusCode),
 		})
 	}
 
-	fmt.Print(tbl.Render())
+	pterm.DefaultTable.WithHasHeader().WithBoxed().WithData(tableData).Render()
 	fmt.Println(fmt.Sprintf("\nMokk server listening on: http://%s:%s. Waiting for requests...", s.Options.Host, s.Options.Port))
 }

@@ -3,9 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"github.com/richtoms/mokk/config"
 	"time"
+
+	"github.com/gofiber/fiber/v3"
+	"github.com/richtoms/mokk/config"
 )
 
 // JsonHandler provides a Fiber Handler for rendering JSON responses
@@ -14,7 +15,7 @@ import (
 // (3) Unmarshal the raw response body, in the event of failure respond with 500.
 // (4) Respond to the client with the found response.
 func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		var body interface{}
 		err := json.Unmarshal(resolveRequestBody(c.Body()), &body)
 
@@ -64,7 +65,7 @@ func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Hand
 }
 
 // getParamsFromCtx extracts all route params into a map from the Fiber context.
-func getParamsFromCtx(c *fiber.Ctx) map[string]string {
+func getParamsFromCtx(c fiber.Ctx) map[string]string {
 	p := map[string]string{}
 
 	for _, param := range c.Route().Params {

@@ -2,12 +2,13 @@ package server
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/utils"
+	"time"
+
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/utils/v2"
 	"github.com/google/uuid"
 	"github.com/richtoms/mokk/config"
 	"github.com/richtoms/mokk/logging"
-	"time"
 )
 
 type Request struct {
@@ -59,7 +60,7 @@ func (l *RequestLog) printEntry(entry LogEntry) {
 
 // listEntriesHandler creates an HTTP handler for listing all entries in the RequestLog.
 func listEntriesHandler(r RequestLog) fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		return c.JSON(map[string]interface{}{
 			"entries": r.Entries,
 		})
@@ -68,7 +69,7 @@ func listEntriesHandler(r RequestLog) fiber.Handler {
 
 // getEntryHandler creates an HTTP handler for retrieving a single entry from the RequestLog by ID.
 func getEntryHandler(r RequestLog) fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		if v, ok := r.Entries[c.Params("request")]; ok {
 			return c.JSON(v)
 		}

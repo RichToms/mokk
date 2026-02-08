@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
-	"github.com/gofiber/fiber/v2"
+	"strconv"
+
+	"github.com/gofiber/fiber/v3"
 	"github.com/pterm/pterm"
 	"github.com/richtoms/mokk/config"
 	"github.com/richtoms/mokk/logging"
-	"strconv"
 )
 
 type Server struct {
@@ -18,9 +19,7 @@ type Server struct {
 }
 
 func NewServer(cfg config.Config, logger logging.Logger, opt Options) Server {
-	app := fiber.New(fiber.Config{
-		DisableStartupMessage: true,
-	})
+	app := fiber.New(fiber.Config{})
 
 	rLog := NewRequestLog(logger)
 	svr := Server{logger, cfg, app, opt, rLog}
@@ -34,11 +33,7 @@ func NewServer(cfg config.Config, logger logging.Logger, opt Options) Server {
 // addConfiguredRoutes adds any routes defined in the Mokk config to the server.
 func (s *Server) addConfiguredRoutes() {
 	for _, route := range s.cfg.Routes {
-		s.app.Add(
-			route.Method,
-			route.Path,
-			JsonHandler(s, s.cfg.Options, route),
-		)
+		s.app.Add([]string{route.Method}, route.Path, JsonHandler(s, s.cfg.Options, route))
 	}
 }
 
@@ -51,7 +46,9 @@ func (s *Server) addSystemRoutes(r RequestLog) {
 
 // Listen is a wrapper around the Fiber App's listen where the host is derived from the server options.
 func (s *Server) Listen() error {
-	return s.app.Listen(s.Options.resolveHost())
+	return s.app.Listen(s.Options.resolveHost(), fiber.ListenConfig{
+		DisableStartupMessage: true,
+	})
 }
 
 // PrintConfig outputs the defined routes in table form and the final host that the server is listening on.

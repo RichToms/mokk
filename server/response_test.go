@@ -1,10 +1,11 @@
 package server
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"testing"
+
+	"github.com/gofiber/fiber/v3"
 	"github.com/richtoms/mokk/config"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestGetResponse(t *testing.T) {

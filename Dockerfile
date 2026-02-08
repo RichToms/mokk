@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine as builder
+FROM golang:1.25-alpine as builder
 
 ARG PROJECT_PATH="."
 ARG DIST_PATH="./mokk"

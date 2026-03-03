@@ -10,10 +10,11 @@ import (
 
 func TestGetResponse(t *testing.T) {
 	tests := []struct {
-		name          string
-		params        map[string]string
-		route         config.Route
-		assertionFunc func(t *testing.T, res Response)
+		name           string
+		params         map[string]string
+		requestHeaders config.RouteRequestHeaders
+		route          config.Route
+		assertionFunc  func(t *testing.T, res Response)
 	}{
 		{
 			name:   "a route with no params is matched",
@@ -165,11 +166,47 @@ func TestGetResponse(t *testing.T) {
 				assert.Equal(t, `{"status":"success"}`, res.Response)
 			},
 		},
+		{
+			name: "a route with requestHeaders returns the matched variant",
+			requestHeaders: map[string][]string{
+				"x-mokk-user":   {"1234"},
+				"x-mokk-client": {"5678"},
+			},
+			route: config.Route{
+				Path:       "users/:user/clients/:client",
+				Method:     fiber.MethodGet,
+				StatusCode: fiber.StatusNotFound,
+				Response:   `{}`,
+				Variants: []config.RouteVariant{
+					{
+						RequestHeaders: map[string][]string{
+							"x-mokk-user":   {"1234"},
+							"x-mokk-client": {"0987"},
+						},
+						StatusCode: fiber.StatusUnauthorized,
+						Response:   `{"status":"failure"}`,
+					},
+					// Test should match the below struct
+					{
+						RequestHeaders: map[string][]string{
+							"x-mokk-user":   {"1234"},
+							"x-mokk-client": {"5678"},
+						},
+						StatusCode: fiber.StatusOK,
+						Response:   `{"status":"success"}`,
+					},
+				},
+			},
+			assertionFunc: func(t *testing.T, res Response) {
+				assert.Equal(t, fiber.StatusOK, res.StatusCode)
+				assert.Equal(t, `{"status":"success"}`, res.Response)
+			},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			res := getResponse(test.params, test.route)
+			res := getResponse(test.params, test.requestHeaders, test.route)
 
 			test.assertionFunc(t, res)
 		})

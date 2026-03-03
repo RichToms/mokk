@@ -1,8 +1,9 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -37,9 +38,22 @@ type Route struct {
 }
 
 type RouteVariant struct {
-	Params     map[string]string `yaml:"params" json:"params"`
-	StatusCode int               `yaml:"statusCode" json:"statusCode"`
-	Response   string            `yaml:"response" json:"response"`
+	Params         map[string]string   `yaml:"params" json:"params"`
+	RequestHeaders RouteRequestHeaders `yaml:"requestHeaders" json:"requestHeaders"`
+	StatusCode     int                 `yaml:"statusCode" json:"statusCode"`
+	Response       string              `yaml:"response" json:"response"`
+}
+
+type RouteRequestHeaders map[string][]string
+
+func (h RouteRequestHeaders) Count() int {
+	var total int
+
+	for _, values := range h {
+		total += len(values)
+	}
+
+	return total
 }
 
 // LoadConfigFromFile attempts to load the config from the given file path.

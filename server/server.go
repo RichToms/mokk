@@ -24,8 +24,8 @@ func NewServer(cfg config.Config, logger logging.Logger, opt Options) Server {
 	rLog := NewRequestLog(logger)
 	svr := Server{logger, cfg, app, opt, rLog}
 
-	svr.addConfiguredRoutes()
 	svr.addSystemRoutes(rLog)
+	svr.addConfiguredRoutes()
 
 	return svr
 }

@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
@@ -30,7 +31,7 @@ func JsonHandler(svr *Server, cfg config.Options, route config.Route) fiber.Hand
 			return fiber.NewError(errRes.StatusCode, errRes.Response)
 		}
 
-		res := getResponse(getParamsFromCtx(c), route)
+		res := getResponse(getParamsFromCtx(c), getHeadersFromCtx(c), route)
 
 		var resBody interface{}
 		err = json.Unmarshal([]byte(res.Response), &resBody)
@@ -74,6 +75,16 @@ func getParamsFromCtx(c fiber.Ctx) map[string]string {
 
 	for key, value := range c.Queries() {
 		p[key] = value
+	}
+
+	return p
+}
+
+func getHeadersFromCtx(c fiber.Ctx) map[string][]string {
+	p := map[string][]string{}
+
+	for key, values := range c.GetHeaders() {
+		p[strings.ToLower(key)] = values
 	}
 
 	return p

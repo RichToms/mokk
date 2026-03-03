@@ -2,12 +2,18 @@ name: Mokk Users Server
 
 options:
   printRequestBody: false
-  
+
 routes:
   - path: users
     method: GET
     statusCode: 200
     response: '{"status":"Success","users":[{"name":"MockZilla"}]}'
+    variants:
+      - requestHeaders:
+          x-mokk-user:
+            - 123
+        statusCode: 200
+        response: '{"status":"Success","user":{"id":123, "name":"MockZilla Jr."}}'
 
   - path: users/:user
     method: GET

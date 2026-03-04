@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadConfigFromFile(t *testing.T) {
@@ -62,7 +63,7 @@ func TestLoadConfigString(t *testing.T) {
 				assert.Equal(t, 200, r.StatusCode)
 				assert.Equal(t, "{\"status\":\"success\"}", r.Response)
 
-				assert.Len(t, r.Variants, 2)
+				assert.Len(t, r.Variants, 3)
 				v = r.Variants[0]
 				assert.Equal(t, "123", v.Params["user"])
 				assert.Equal(t, "123", v.Params["client"])
@@ -70,6 +71,12 @@ func TestLoadConfigString(t *testing.T) {
 				assert.Equal(t, "{\"status\":\"success\",\"client\":{}}", v.Response)
 
 				v = r.Variants[1]
+				assert.Contains(t, v.RequestHeaders["x-mokk-user"], "123")
+				assert.Contains(t, v.RequestHeaders["x-mokk-client"], "234")
+				assert.Equal(t, 200, v.StatusCode)
+				assert.Equal(t, "{\"status\":\"success\",\"client\":{}}", v.Response)
+
+				v = r.Variants[2]
 				assert.Equal(t, "123", v.Params["user"])
 				assert.Equal(t, "456", v.Params["client"])
 				assert.Equal(t, 404, v.StatusCode)
@@ -128,6 +135,13 @@ routes:
       - params:
           user: 123
           client: 123
+        statusCode: 200
+        response: '{"status":"success","client":{}}'
+      - requestHeaders:
+          x-mokk-user:
+            - 123
+          x-mokk-client:
+            - 234
         statusCode: 200
         response: '{"status":"success","client":{}}'
       - params:

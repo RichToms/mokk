@@ -2,6 +2,7 @@ name: Mokk Users Server
 
 options:
   printRequestBody: false
+  trackRequests: true
 
 routes:
   - path: users

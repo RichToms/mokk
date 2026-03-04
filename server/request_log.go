@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
@@ -26,10 +27,11 @@ type LogEntry struct {
 type RequestLog struct {
 	logger  logging.Logger
 	Entries map[string]LogEntry
+	mux     *sync.Mutex
 }
 
 func NewRequestLog(logger logging.Logger) RequestLog {
-	return RequestLog{logger, map[string]LogEntry{}}
+	return RequestLog{logger, map[string]LogEntry{}, &sync.Mutex{}}
 }
 
 // Record adds a new entry to the RequestLog
@@ -44,7 +46,9 @@ func (l *RequestLog) Record(route config.Route, request interface{}, response Re
 		Timestamp: time.Now(),
 	}
 
+	l.mux.Lock()
 	l.Entries[entry.Id] = entry
+	l.mux.Unlock()
 
 	l.printEntry(entry)
 
